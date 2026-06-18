@@ -1,0 +1,111 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  useRouter,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
+import { useEffect, type ReactNode } from "react";
+
+import appCss from "../styles.css?url";
+import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Header } from "../components/site/Header";
+import { Footer } from "../components/site/Footer";
+import { LeadProvider } from "../components/site/lead-context";
+
+function NotFoundComponent() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <p className="text-xs uppercase tracking-[0.3em] text-gold">404</p>
+        <h1 className="mt-4 font-display text-5xl">Page not found</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <Link to="/" className="mt-6 inline-flex rounded-md bg-gold px-5 py-3 text-sm font-semibold text-gold-foreground">
+          Return Home
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+  console.error(error);
+  const router = useRouter();
+  useEffect(() => {
+    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+  }, [error]);
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <h1 className="font-display text-3xl">This page didn't load</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Something went wrong. Please try again.</p>
+        <div className="mt-6 flex justify-center gap-2">
+          <button onClick={() => { router.invalidate(); reset(); }} className="rounded-md bg-gold px-4 py-2 text-sm font-semibold text-gold-foreground">Try again</button>
+          <a href="/" className="rounded-md border border-border px-4 py-2 text-sm">Go home</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Usama Shareef | Premium Real Estate Investments & Luxury Bungalows" },
+      { name: "description", content: "Explore ROI-focused land and luxury 3BHK bungalow investments in Karjat and prime locations. Secure your smart investment today." },
+      { name: "author", content: "Usama Shareef Estates" },
+      { property: "og:title", content: "Usama Shareef | Premium Real Estate Investments" },
+      { property: "og:description", content: "Smart, Safe & ROI-focused land and luxury bungalow investments in Karjat." },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Usama Shareef Estates" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" },
+    ],
+  }),
+  shellComponent: RootShell,
+  component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
+});
+
+function RootShell({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" className="dark">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <LeadProvider>
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          <Footer />
+        </div>
+      </LeadProvider>
+    </QueryClientProvider>
+  );
+}

@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "framework": null,
+  "outputDirectory": ".output",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}
