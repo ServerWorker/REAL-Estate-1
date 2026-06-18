@@ -4,7 +4,7 @@
   "outputDirectory": ".output",
   "functions": {
     "api/**/*.js": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs@20.x"
     }
   }
 }
